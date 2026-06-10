@@ -1,0 +1,45 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "super-market-eb888",
+          "appId": "1:466866919080:android:53a172796ab7a433d6949d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "super-market-eb888",
+          "appId": "1:466866919080:ios:81e0d89aab906b12d6949d",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "super-market-eb888",
+          "appId": "1:466866919080:ios:81e0d89aab906b12d6949d",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "super-market-eb888",
+          "configurations": {
+            "android": "1:466866919080:android:53a172796ab7a433d6949d",
+            "ios": "1:466866919080:ios:81e0d89aab906b12d6949d",
+            "macos": "1:466866919080:ios:81e0d89aab906b12d6949d",
+            "web": "1:466866919080:web:b20c2706579b440bd6949d",
+            "windows": "1:466866919080:web:df31dc127c334b68d6949d"
+          }
+        }
+      }
+    }
+  }
+}

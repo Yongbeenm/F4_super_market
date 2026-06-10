@@ -1,0 +1,63 @@
+═══════════════════════════════════════════════════════════════
+  📱 SUPER MARKET APP - LATEST BUILD READY!
+═══════════════════════════════════════════════════════════════
+
+✅ BUILD SUCCESSFUL!
+   Date: May 27, 2026 at 15:45
+   Time: 46.6 seconds
+   Size: 55.9 MB
+
+🐛 WHAT'S FIXED IN THIS BUILD:
+   ✓ Image upload bug - No more "object-not-found" error!
+   ✓ Edit products/categories without changing image works now
+   ✓ Multi-device login support
+   ✓ Enhanced image picker (gallery/camera/URL)
+
+📦 APK LOCATION:
+   build/app/outputs/flutter-apk/app-release.apk
+
+📲 HOW TO INSTALL:
+
+   Option 1: USB Cable
+   ─────────────────────
+   1. Connect phone via USB
+   2. Enable USB debugging
+   3. Run: adb install build/app/outputs/flutter-apk/app-release.apk
+
+   Option 2: Direct Transfer
+   ──────────────────────────
+   1. Copy app-release.apk to your phone
+   2. Open the file on your phone
+   3. Allow "Install from unknown sources" if asked
+   4. Tap "Install"
+
+   Option 3: Cloud Share
+   ─────────────────────
+   1. Upload app-release.apk to Google Drive/Dropbox
+   2. Download on your phone
+   3. Install as above
+
+🧪 TEST THESE FEATURES:
+   □ Edit category WITHOUT changing image (should work now!)
+   □ Edit product WITHOUT changing image (should work now!)
+   □ Edit and CHANGE image (gallery/camera/URL)
+   □ Add new product with image
+   □ Add new category with image
+   □ Login on multiple devices
+   □ Upload images via URL
+
+🔐 ADMIN LOGIN:
+   Email: yongbeenm@gmail.com
+   Password: [Your password]
+
+⚠️ IMPORTANT:
+   - Uninstall old version first if you have issues
+   - Grant camera and storage permissions when asked
+   - Make sure you have internet connection
+   - Firebase must be configured
+
+🎉 READY TO TEST!
+   The image upload bug is fixed. You can now edit categories
+   and products without getting the "object-not-found" error!
+
+═══════════════════════════════════════════════════════════════
