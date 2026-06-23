@@ -12,7 +12,20 @@
           "package_name": "com.smartmart.smartmart_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "466866919080-3uoda0a41d279qmucp3mikrgqihv5o2b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartmart.smartmart_app",
+            "certificate_hash": "d10870693bcb7363e6097db5baef430940bb620e"
+          }
+        },
+        {
+          "client_id": "466866919080-fu4lpemdms3927u7uu2ki58h80r0vubd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB3CH0-zyK4UBXcrobrwLBkPe6rnd8istk"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "466866919080-fu4lpemdms3927u7uu2ki58h80r0vubd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "466866919080-7um8gju495jtmi0ijbsahn4ocdpsipm5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.smartmart.smartmartApp"
+              }
+            }
+          ]
         }
       }
     }

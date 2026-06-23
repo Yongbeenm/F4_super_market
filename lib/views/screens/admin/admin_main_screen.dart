@@ -8,7 +8,6 @@ import 'manage_categories_screen.dart';
 import 'view_all_orders_screen.dart';
 import 'view_users_screen.dart';
 import 'reports_screen.dart';
-import 'data_management_screen.dart';
 
 /// Admin Main Screen - Separate interface for admin users
 /// Admins are sellers, not buyers - they manage the store
@@ -329,18 +328,6 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const ReportsScreen(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppTheme.spaceSmall),
-                      _buildModernActionCard(
-                        'Data Management',
-                        'Clean duplicates and upload fresh data',
-                        Icons.storage_rounded,
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DataManagementScreen(),
                           ),
                         ),
                       ),

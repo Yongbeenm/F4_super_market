@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../../../services/admin_service.dart';
 
 /// View Users Screen - Admin can see all registered users
 class ViewUsersScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class ViewUsersScreen extends StatefulWidget {
 
 class _ViewUsersScreenState extends State<ViewUsersScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AdminService _adminService = AdminService();
   String _searchQuery = '';
 
   @override
@@ -116,173 +118,179 @@ class _ViewUsersScreenState extends State<ViewUsersScreen> {
     final name = data['name'] ?? 'Unknown';
     final email = data['email'] ?? 'Unknown';
     final createdAt = data['createdAt'] as Timestamp?;
-    final isAdmin = email.toLowerCase() == 'yongbeenm@gmail.com';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.all(16),
-        leading: Container(
-          width: 50,
-          height: 50,
+    return FutureBuilder<bool>(
+      future: _adminService.isAdmin(email),
+      builder: (context, snapshot) {
+        final isAdmin = snapshot.data ?? false;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: isAdmin ? Colors.amber.shade100 : const Color(0xFFB8E6D5),
-            shape: BoxShape.circle,
-            border: isAdmin ? Border.all(color: Colors.amber, width: 2) : null,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Icon(
-            isAdmin ? Icons.admin_panel_settings : Icons.person,
-            color: isAdmin ? Colors.amber.shade700 : const Color(0xFF0D5C3D),
-            size: 28,
-          ),
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0D5C3D),
-                ),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.all(16),
+            leading: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: isAdmin ? Colors.amber.shade100 : const Color(0xFFB8E6D5),
+                shape: BoxShape.circle,
+                border: isAdmin ? Border.all(color: Colors.amber, width: 2) : null,
+              ),
+              child: Icon(
+                isAdmin ? Icons.admin_panel_settings : Icons.person,
+                color: isAdmin ? Colors.amber.shade700 : const Color(0xFF0D5C3D),
+                size: 28,
               ),
             ),
-            if (isAdmin)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'ADMIN',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0D5C3D),
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              email,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+                if (isAdmin)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.amber,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'ADMIN',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            if (createdAt != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                'Joined: ${DateFormat('MMM dd, yyyy').format(createdAt.toDate())}',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade500,
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                if (createdAt != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Joined: ${DateFormat('MMM dd, yyyy').format(createdAt.toDate())}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            children: [
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: FutureBuilder<Map<String, dynamic>>(
+                  future: _getUserStats(userId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF0D5C3D),
+                        ),
+                      );
+                    }
+
+                    final stats = snapshot.data ?? {};
+                    final orderCount = stats['orderCount'] ?? 0;
+                    final totalSpent = stats['totalSpent'] ?? 0.0;
+                    final cartItems = stats['cartItems'] ?? 0;
+                    final wishlistItems = stats['wishlistItems'] ?? 0;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'User Statistics:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0D5C3D),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatItem(
+                                'Orders',
+                                orderCount.toString(),
+                                Icons.shopping_bag,
+                                Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatItem(
+                                'Total Spent',
+                                '\$${totalSpent.toStringAsFixed(2)}',
+                                Icons.attach_money,
+                                Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatItem(
+                                'Cart Items',
+                                cartItems.toString(),
+                                Icons.shopping_cart,
+                                Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatItem(
+                                'Wishlist',
+                                wishlistItems.toString(),
+                                Icons.favorite,
+                                Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
-          ],
-        ),
-        children: [
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: _getUserStats(userId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF0D5C3D),
-                    ),
-                  );
-                }
-
-                final stats = snapshot.data ?? {};
-                final orderCount = stats['orderCount'] ?? 0;
-                final totalSpent = stats['totalSpent'] ?? 0.0;
-                final cartItems = stats['cartItems'] ?? 0;
-                final wishlistItems = stats['wishlistItems'] ?? 0;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'User Statistics:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0D5C3D),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatItem(
-                            'Orders',
-                            orderCount.toString(),
-                            Icons.shopping_bag,
-                            Colors.orange,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildStatItem(
-                            'Total Spent',
-                            '\$${totalSpent.toStringAsFixed(2)}',
-                            Icons.attach_money,
-                            Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatItem(
-                            'Cart Items',
-                            cartItems.toString(),
-                            Icons.shopping_cart,
-                            Colors.blue,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildStatItem(
-                            'Wishlist',
-                            wishlistItems.toString(),
-                            Icons.favorite,
-                            Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

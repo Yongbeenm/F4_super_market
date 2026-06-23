@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/product_service.dart';
-import '../../../widgets/image_picker_widget.dart';
 
 /// Manage Products Screen - Admin can add, edit, delete products
 class ManageProductsScreen extends StatefulWidget {
@@ -265,7 +264,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     final descController = TextEditingController();
     final priceController = TextEditingController();
     final stockController = TextEditingController();
-    String selectedImageUrl = '';
+    final imageUrlController = TextEditingController();
     String? selectedCategory;
 
     showDialog(
@@ -316,12 +315,14 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 12),
-                // New Image Picker Widget
-                ImagePickerWidget(
-                  uploadFolder: 'products',
-                  onImageSelected: (imageUrl) {
-                    selectedImageUrl = imageUrl;
-                  },
+                TextField(
+                  controller: imageUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Image URL',
+                    hintText: 'https://example.com/image.jpg',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.image),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 StreamBuilder<QuerySnapshot>(
@@ -391,9 +392,9 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                     'stock': int.parse(stockController.text.isEmpty ? '0' : stockController.text),
                     'categoryId': selectedCategory,
                     'categoryName': catName,
-                    'imageUrls': selectedImageUrl.isEmpty 
-                        ? [] 
-                        : [selectedImageUrl],
+                    'imageUrls': imageUrlController.text.trim().isEmpty
+                        ? []
+                        : [imageUrlController.text.trim()],
                     'isAvailable': true,
                   });
 
@@ -435,8 +436,8 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     final priceController = TextEditingController(text: data['price'].toString());
     final stockController = TextEditingController(text: data['stock'].toString());
     final imageUrls = data['imageUrls'] as List<dynamic>?;
-    final initialImageUrl = imageUrls != null && imageUrls.isNotEmpty ? imageUrls[0] : '';
-    String selectedImageUrl = initialImageUrl;
+    final initialImageUrl = imageUrls != null && imageUrls.isNotEmpty ? imageUrls[0].toString() : '';
+    final imageUrlController = TextEditingController(text: initialImageUrl);
     String? selectedCategory = data['categoryId'];
 
     showDialog(
@@ -487,13 +488,14 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 12),
-                // New Image Picker Widget with initial image
-                ImagePickerWidget(
-                  initialImageUrl: initialImageUrl,
-                  uploadFolder: 'products',
-                  onImageSelected: (imageUrl) {
-                    selectedImageUrl = imageUrl;
-                  },
+                TextField(
+                  controller: imageUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Image URL',
+                    hintText: 'https://example.com/image.jpg',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.image),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 StreamBuilder<QuerySnapshot>(
@@ -551,9 +553,9 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                     'stock': int.parse(stockController.text),
                     'categoryId': selectedCategory,
                     'categoryName': catName,
-                    'imageUrls': selectedImageUrl.isEmpty 
-                        ? [] 
-                        : [selectedImageUrl],
+                    'imageUrls': imageUrlController.text.trim().isEmpty
+                        ? []
+                        : [imageUrlController.text.trim()],
                   });
 
                   if (mounted) {

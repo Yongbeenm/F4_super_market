@@ -6,12 +6,16 @@ import '../utils/sample_data.dart';
 class AdminService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Admin email
-  static const String adminEmail = 'yongbeenm@gmail.com';
+  // Admin emails - add new admin emails here
+  static const List<String> adminEmails = [
+    'yongbeenm@gmail.com',
+    'phanuseng124@gmail.com',
+  ];
 
   /// Check if user is admin
   Future<bool> isAdmin(String email) async {
-    return email.toLowerCase() == adminEmail.toLowerCase();
+    final emailLower = email.toLowerCase();
+    return adminEmails.any((adminEmail) => adminEmail.toLowerCase() == emailLower);
   }
 
   /// Upload sample data to Firestore

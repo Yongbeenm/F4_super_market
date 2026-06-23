@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/admin_service.dart';
 import '../../../utils/app_theme.dart';
 
 /// Modern Login Screen with Gradient Background and Animations
@@ -16,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
+  final _adminService = AdminService();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   late AnimationController _logoAnimationController;
@@ -107,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         if (mounted) {
           // Check if user is admin
           final email = _emailController.text.trim();
-          final isAdmin = email.toLowerCase() == 'yongbeenm@gmail.com';
+          final isAdmin = await _adminService.isAdmin(email);
           
           // Show success message with offline indicator
           final message = result['isOffline'] == true
@@ -159,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       if (mounted) {
         // Check if user is admin
         final email = userCredential.user?.email ?? '';
-        final isAdmin = email.toLowerCase() == 'yongbeenm@gmail.com';
+        final isAdmin = await _adminService.isAdmin(email);
         
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(

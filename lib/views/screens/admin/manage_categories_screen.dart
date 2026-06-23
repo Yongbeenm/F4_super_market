@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/product_service.dart';
-import '../../../widgets/image_picker_widget.dart';
 
 /// Manage Categories Screen - Admin can add, edit, delete categories
 class ManageCategoriesScreen extends StatefulWidget {
@@ -211,7 +210,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
     final orderController = TextEditingController(text: '1');
-    String selectedImageUrl = '';
+    final imageUrlController = TextEditingController();
 
     showDialog(
       context: context,
@@ -233,12 +232,14 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // New Image Picker Widget
-                ImagePickerWidget(
-                  uploadFolder: 'categories',
-                  onImageSelected: (imageUrl) {
-                    selectedImageUrl = imageUrl;
-                  },
+                TextField(
+                  controller: imageUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Image URL',
+                    hintText: 'https://example.com/image.jpg',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.image),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -272,7 +273,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                 try {
                   await _productService.addCategory({
                     'name': nameController.text,
-                    'imageUrl': selectedImageUrl,
+                    'imageUrl': imageUrlController.text.trim(),
                     'displayOrder': int.parse(orderController.text.isEmpty ? '1' : orderController.text),
                   });
 
@@ -312,7 +313,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     final nameController = TextEditingController(text: data['name']);
     final orderController = TextEditingController(text: data['displayOrder'].toString());
     final initialImageUrl = data['imageUrl'] ?? '';
-    String selectedImageUrl = initialImageUrl;
+    final imageUrlController = TextEditingController(text: initialImageUrl);
 
     showDialog(
       context: context,
@@ -334,13 +335,14 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // New Image Picker Widget with initial image
-                ImagePickerWidget(
-                  initialImageUrl: initialImageUrl,
-                  uploadFolder: 'categories',
-                  onImageSelected: (imageUrl) {
-                    selectedImageUrl = imageUrl;
-                  },
+                TextField(
+                  controller: imageUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Image URL',
+                    hintText: 'https://example.com/image.jpg',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.image),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -364,7 +366,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                 try {
                   await _productService.updateCategory(categoryId, {
                     'name': nameController.text,
-                    'imageUrl': selectedImageUrl,
+                    'imageUrl': imageUrlController.text.trim(),
                     'displayOrder': int.parse(orderController.text),
                   });
 

@@ -20,6 +20,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   int _totalProducts = 0;
   int _totalCustomers = 0;
   double _averageOrderValue = 0.0;
+
+  // Helper: format money to 2 decimal places always
+  String _fmt(double value) => value.toStringAsFixed(2);
   
   List<Map<String, dynamic>> _topProducts = [];
   List<Map<String, dynamic>> _recentOrders = [];
@@ -105,7 +108,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
       }
 
       _totalOrders = allOrders.length;
-      _averageOrderValue = _totalOrders > 0 ? _totalRevenue / _totalOrders : 0.0;
+      _averageOrderValue = double.parse(
+        (_totalOrders > 0 ? _totalRevenue / _totalOrders : 0.0)
+            .toStringAsFixed(2),
+      );
+      _totalRevenue = double.parse(_totalRevenue.toStringAsFixed(2));
 
       // Get top 5 products by sales count
       final sortedProducts = productSales.entries.toList()
@@ -175,7 +182,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       Expanded(
                         child: _buildOverviewCard(
                           'Total Revenue',
-                          '\$${_totalRevenue.toStringAsFixed(2)}',
+                          '\$${_fmt(_totalRevenue)}',
                           Icons.attach_money,
                           Colors.green,
                         ),
@@ -197,7 +204,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       Expanded(
                         child: _buildOverviewCard(
                           'Avg Order Value',
-                          '\$${_averageOrderValue.toStringAsFixed(2)}',
+                          '\$${_fmt(_averageOrderValue)}',
                           Icons.trending_up,
                           Colors.blue,
                         ),
@@ -346,7 +353,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               ),
                             ),
                             Text(
-                              '\$${product['revenue'].toStringAsFixed(2)}',
+                              '\$${_fmt((product['revenue'] as double))}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -461,7 +468,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  '\$$total',
+                                  '\$${_fmt(total)}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
