@@ -216,6 +216,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               onTap: () => _showComingSoon('View Users'),
             ),
 
+            const SizedBox(height: 12),
+
+            // Test Notifications Card
+            _buildActionCard(
+              icon: Icons.notifications_active,
+              title: 'Test Notifications',
+              description: 'Test push notifications and FCM setup',
+              color: Colors.red,
+              onTap: () => Navigator.pushNamed(context, '/test-notification'),
+            ),
+
             const SizedBox(height: 24),
 
             // Statistics Section

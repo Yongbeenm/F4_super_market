@@ -30,7 +30,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('categories').orderBy('displayOrder').snapshots(),
+        stream: _firestore.collection('categories').orderBy('name').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -99,7 +99,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
   Widget _buildCategoryCard(String categoryId, Map<String, dynamic> data) {
     final name = data['name'] ?? 'Unknown';
     final imageUrl = data['imageUrl'] ?? '';
-    final displayOrder = data['displayOrder'] ?? 0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -165,13 +164,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
             color: Color(0xFF0D5C3D),
           ),
         ),
-        subtitle: Text(
-          'Display Order: $displayOrder',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-        ),
         trailing: PopupMenuButton<String>(
           onSelected: (value) {
             if (value == 'edit') {
@@ -209,7 +201,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
 
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
-    final orderController = TextEditingController(text: '1');
     final imageUrlController = TextEditingController();
 
     showDialog(
@@ -241,15 +232,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                     prefixIcon: Icon(Icons.image),
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: orderController,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Order',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
               ],
             ),
           ),
@@ -274,7 +256,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                   await _productService.addCategory({
                     'name': nameController.text,
                     'imageUrl': imageUrlController.text.trim(),
-                    'displayOrder': int.parse(orderController.text.isEmpty ? '1' : orderController.text),
                   });
 
                   if (mounted) {
@@ -311,7 +292,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
 
   void _showEditCategoryDialog(String categoryId, Map<String, dynamic> data) {
     final nameController = TextEditingController(text: data['name']);
-    final orderController = TextEditingController(text: data['displayOrder'].toString());
     final initialImageUrl = data['imageUrl'] ?? '';
     final imageUrlController = TextEditingController(text: initialImageUrl);
 
@@ -344,15 +324,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                     prefixIcon: Icon(Icons.image),
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: orderController,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Order',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
               ],
             ),
           ),
@@ -367,7 +338,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                   await _productService.updateCategory(categoryId, {
                     'name': nameController.text,
                     'imageUrl': imageUrlController.text.trim(),
-                    'displayOrder': int.parse(orderController.text),
                   });
 
                   if (mounted) {

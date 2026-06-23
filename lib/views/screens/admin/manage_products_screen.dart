@@ -175,7 +175,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
           children: [
             const SizedBox(height: 4),
             Text(
-              '\$$price',
+              '\$${price.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

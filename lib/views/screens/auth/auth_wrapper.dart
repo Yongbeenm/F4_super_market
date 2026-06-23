@@ -11,10 +11,10 @@ import '../admin/admin_main_screen.dart';
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
-  final AdminService _adminService = const AdminService();
-
   @override
   Widget build(BuildContext context) {
+    final AdminService adminService = AdminService();
+    
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -57,7 +57,7 @@ class AuthWrapper extends StatelessWidget {
           
           // Check if user is admin
           return FutureBuilder<bool>(
-            future: _adminService.isAdmin(user.email ?? ''),
+            future: adminService.isAdmin(user.email ?? ''),
             builder: (context, adminSnapshot) {
               if (adminSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(

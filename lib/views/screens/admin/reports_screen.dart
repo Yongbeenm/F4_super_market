@@ -14,6 +14,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = true;
   
+  // Date filter options
+  String _selectedFilter = 'all'; // 'all', 'today', 'month', 'year'
+  DateTime _selectedDate = DateTime.now();
+  
   // Analytics data
   double _totalRevenue = 0.0;
   int _totalOrders = 0;
@@ -34,6 +38,44 @@ class _ReportsScreenState extends State<ReportsScreen> {
     _loadAnalytics();
   }
 
+  /// Check if order date matches the selected filter
+  bool _matchesDateFilter(DateTime orderDate) {
+    final now = _selectedDate;
+    
+    switch (_selectedFilter) {
+      case 'today':
+        return orderDate.year == now.year &&
+               orderDate.month == now.month &&
+               orderDate.day == now.day;
+      
+      case 'month':
+        return orderDate.year == now.year &&
+               orderDate.month == now.month;
+      
+      case 'year':
+        return orderDate.year == now.year;
+      
+      case 'all':
+      default:
+        return true;
+    }
+  }
+
+  /// Get filter label for display
+  String _getFilterLabel() {
+    switch (_selectedFilter) {
+      case 'today':
+        return 'Today (${DateFormat('MMM dd, yyyy').format(_selectedDate)})';
+      case 'month':
+        return DateFormat('MMMM yyyy').format(_selectedDate);
+      case 'year':
+        return DateFormat('yyyy').format(_selectedDate);
+      case 'all':
+      default:
+        return 'All Time';
+    }
+  }
+
   Future<void> _loadAnalytics() async {
     setState(() {
       _isLoading = true;
@@ -50,6 +92,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
       // Get all orders from all users
       List<Map<String, dynamic>> allOrders = [];
+      List<Map<String, dynamic>> filteredOrders = [];
       Map<String, int> productSales = {}; // Track product sales count
       Map<String, double> productRevenue = {}; // Track product revenue
       Map<String, String> productNames = {}; // Store product names
@@ -61,6 +104,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         'delivered': 0,
         'cancelled': 0,
       };
+      
+      // Reset totals
+      _totalRevenue = 0.0;
 
       for (var userDoc in usersSnapshot.docs) {
         final ordersSnapshot = await _firestore
@@ -73,14 +119,26 @@ class _ReportsScreenState extends State<ReportsScreen> {
         for (var orderDoc in ordersSnapshot.docs) {
           final orderData = orderDoc.data();
           final userData = userDoc.data();
+          final createdAt = orderData['createdAt'] as Timestamp?;
+          
+          if (createdAt == null) continue;
+          
+          final orderDate = createdAt.toDate();
           
           // Add to all orders
-          allOrders.add({
+          final orderInfo = {
             ...orderData,
             'orderId': orderDoc.id,
             'userId': userDoc.id,
             'userName': userData['name'] ?? 'Unknown',
-          });
+          };
+          
+          allOrders.add(orderInfo);
+          
+          // Check if order matches date filter
+          if (!_matchesDateFilter(orderDate)) continue;
+          
+          filteredOrders.add(orderInfo);
 
           // Calculate revenue
           final total = (orderData['total'] ?? 0).toDouble();
@@ -107,7 +165,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         }
       }
 
-      _totalOrders = allOrders.length;
+      _totalOrders = filteredOrders.length;
       _averageOrderValue = double.parse(
         (_totalOrders > 0 ? _totalRevenue / _totalOrders : 0.0)
             .toStringAsFixed(2),
@@ -127,8 +185,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
         };
       }).toList();
 
-      // Get recent 5 orders
-      _recentOrders = allOrders.take(5).toList();
+      // Get recent 5 orders from filtered results
+      _recentOrders = filteredOrders.take(5).toList();
 
       setState(() {
         _isLoading = false;
@@ -141,6 +199,152 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
   }
 
+  /// Show date filter options
+  Future<void> _showFilterOptions() async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Filter Revenue Report',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0D5C3D),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildFilterOption('All Time', 'all'),
+              _buildFilterOption('Today', 'today'),
+              _buildFilterOption('This Month', 'month'),
+              _buildFilterOption('This Year', 'year'),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (result != null && result != _selectedFilter) {
+      setState(() {
+        _selectedFilter = result;
+        _selectedDate = DateTime.now(); // Reset to current date
+      });
+      await _loadAnalytics();
+    }
+  }
+
+  Widget _buildFilterOption(String label, String value) {
+    final isSelected = _selectedFilter == value;
+    return InkWell(
+      onTap: () => Navigator.pop(context, value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF0D5C3D).withOpacity(0.1) : null,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle : Icons.circle_outlined,
+              color: isSelected ? const Color(0xFF0D5C3D) : Colors.grey,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF0D5C3D) : Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Navigate to previous time period
+  Future<void> _navigatePrevious() async {
+    setState(() {
+      switch (_selectedFilter) {
+        case 'today':
+          _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+          break;
+        case 'month':
+          _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
+          break;
+        case 'year':
+          _selectedDate = DateTime(_selectedDate.year - 1);
+          break;
+      }
+    });
+    await _loadAnalytics();
+  }
+
+  /// Navigate to next time period
+  Future<void> _navigateNext() async {
+    final now = DateTime.now();
+    setState(() {
+      switch (_selectedFilter) {
+        case 'today':
+          final nextDay = _selectedDate.add(const Duration(days: 1));
+          if (nextDay.isBefore(now) || nextDay.day == now.day) {
+            _selectedDate = nextDay;
+          }
+          break;
+        case 'month':
+          final nextMonth = DateTime(_selectedDate.year, _selectedDate.month + 1);
+          if (nextMonth.isBefore(now) || 
+              (nextMonth.year == now.year && nextMonth.month == now.month)) {
+            _selectedDate = nextMonth;
+          }
+          break;
+        case 'year':
+          final nextYear = DateTime(_selectedDate.year + 1);
+          if (nextYear.year <= now.year) {
+            _selectedDate = nextYear;
+          }
+          break;
+      }
+    });
+    await _loadAnalytics();
+  }
+
+  bool _canNavigateNext() {
+    final now = DateTime.now();
+    switch (_selectedFilter) {
+      case 'today':
+        return _selectedDate.year < now.year ||
+               _selectedDate.month < now.month ||
+               _selectedDate.day < now.day;
+      case 'month':
+        return _selectedDate.year < now.year ||
+               (_selectedDate.year == now.year && _selectedDate.month < now.month);
+      case 'year':
+        return _selectedDate.year < now.year;
+      default:
+        return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -150,6 +354,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
         backgroundColor: const Color(0xFF0D5C3D),
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterOptions,
+            tooltip: 'Filter by Date',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadAnalytics,
@@ -167,6 +376,114 @@ class _ReportsScreenState extends State<ReportsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Date Filter Display with Navigation
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0D5C3D), Color(0xFF1A8B5A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0D5C3D).withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Showing Revenue For:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: _showFilterOptions,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.tune, color: Colors.white, size: 14),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Change Filter',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Previous button
+                            if (_selectedFilter != 'all')
+                              IconButton(
+                                onPressed: _navigatePrevious,
+                                icon: const Icon(Icons.chevron_left, color: Colors.white),
+                                tooltip: 'Previous',
+                              )
+                            else
+                              const SizedBox(width: 48),
+                            
+                            // Date display
+                            Expanded(
+                              child: Text(
+                                _getFilterLabel(),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            
+                            // Next button
+                            if (_selectedFilter != 'all')
+                              IconButton(
+                                onPressed: _canNavigateNext() ? _navigateNext : null,
+                                icon: Icon(
+                                  Icons.chevron_right,
+                                  color: _canNavigateNext() ? Colors.white : Colors.white30,
+                                ),
+                                tooltip: 'Next',
+                              )
+                            else
+                              const SizedBox(width: 48),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
                   // Overview Cards
                   const Text(
                     'Overview',
