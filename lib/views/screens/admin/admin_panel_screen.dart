@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../services/admin_service.dart';
 import '../../../services/auth_service.dart';
+import 'view_feedback_screen.dart';
 
 /// Admin Panel Screen
 /// Only accessible to admin users
@@ -225,6 +226,22 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               description: 'Test push notifications and FCM setup',
               color: Colors.red,
               onTap: () => Navigator.pushNamed(context, '/test-notification'),
+            ),
+
+            const SizedBox(height: 12),
+
+            // View Feedback Card
+            _buildActionCard(
+              icon: Icons.feedback,
+              title: 'User Feedback',
+              description: 'View and respond to user feedback',
+              color: Colors.indigo,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ViewFeedbackScreen(),
+                ),
+              ),
             ),
 
             const SizedBox(height: 24),

@@ -13,6 +13,7 @@ import 'views/screens/admin/data_upload_screen.dart';
 import 'views/screens/admin/admin_main_screen.dart';
 import 'views/screens/test_connection_screen.dart';
 import 'views/screens/test_notification_screen.dart';
+import 'views/screens/main/feedback_screen.dart';
 import 'services/notification_service.dart';
 
 // Background message handler
@@ -64,6 +65,7 @@ class F4SupermarketApp extends StatelessWidget {
         '/data-upload': (context) => const DataUploadScreen(),
         '/test': (context) => const TestConnectionScreen(),
         '/test-notification': (context) => const TestNotificationScreen(),
+        '/feedback': (context) => const FeedbackScreen(),
       },
     );
   }

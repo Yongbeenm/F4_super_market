@@ -8,6 +8,7 @@ import '../admin/admin_panel_screen.dart';
 import '../payment/payment_methods_screen.dart';
 import '../settings/settings_screen.dart';
 import '../support/help_support_screen.dart';
+import 'feedback_screen.dart';
 
 /// Profile Screen with iOS-style animations
 class ProfileScreen extends StatefulWidget {
@@ -294,6 +295,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                             context,
                             MaterialPageRoute(
                               builder: (context) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.feedback,
+                        title: 'Feedback',
+                        subtitle: 'Share your thoughts',
+                        delay: 0.65,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FeedbackScreen(),
                             ),
                           );
                         },

@@ -203,6 +203,37 @@ class NotificationService {
     );
   }
 
+  /// Show feedback notification (for admin)
+  Future<void> showFeedbackNotification({
+    required String userName,
+    required String feedbackType,
+    required String message,
+  }) async {
+    String icon = '';
+    switch (feedbackType) {
+      case 'complaint':
+        icon = '⚠️';
+        break;
+      case 'suggestion':
+        icon = '💡';
+        break;
+      case 'bug':
+        icon = '🐛';
+        break;
+      case 'compliment':
+        icon = '👍';
+        break;
+      default:
+        icon = '📝';
+    }
+
+    await _showLocalNotification(
+      title: '$icon New Feedback from $userName',
+      body: message.length > 50 ? '${message.substring(0, 50)}...' : message,
+      payload: 'feedback:$feedbackType',
+    );
+  }
+
   /// Get FCM token
   Future<String?> getToken() async {
     return await _firebaseMessaging.getToken();
